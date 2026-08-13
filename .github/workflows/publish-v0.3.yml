@@ -1,0 +1,123 @@
+name: Publish HEARTLIGHT v0.3 verified binaries
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v0.3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download verified Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: release
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 31672112593
+
+      - name: Download verified Android application
+        uses: actions/download-artifact@v4
+        with:
+          name: android-app
+          path: release
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 31672198326
+
+      - name: Download verified Apple applications
+        uses: actions/download-artifact@v4
+        with:
+          name: apple-apps
+          path: release
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 31672392479
+
+      - name: Download verified C++ and Rust libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: native-libraries
+          path: release
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: 31672198326
+
+      - name: Verify expected release payload
+        run: |
+          set -euo pipefail
+          test -f release/COSMOS-HEARTLIGHT-Setup.exe
+          test -f release/COSMOS-HEARTLIGHT-Android.apk
+          test -f release/COSMOS-HEARTLIGHT-macOS.dmg
+          test -f release/COSMOS-HEARTLIGHT-macOS.app.zip
+          test -f release/COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+          test -f release/COSMOS-HEARTLIGHT-iOS-unsigned.ipa
+          test -f release/heartlight-cpp-linux.zip
+          test -f release/heartlight-rust-linux.zip
+          ls -lh release
+
+      - name: Generate SHA-256 manifest
+        run: |
+          cd release
+          shasum -a 256 COSMOS-HEARTLIGHT-Setup.exe \
+            COSMOS-HEARTLIGHT-Android.apk \
+            COSMOS-HEARTLIGHT-macOS.dmg \
+            COSMOS-HEARTLIGHT-macOS.app.zip \
+            COSMOS-HEARTLIGHT-iOS-Simulator.app.zip \
+            COSMOS-HEARTLIGHT-iOS-unsigned.ipa \
+            heartlight-cpp-linux.zip \
+            heartlight-rust-linux.zip > SHA256SUMS.txt
+
+      - name: Write release notes
+        run: |
+          cat > release-body.md <<'EOF'
+          # COSMOS HEARTLIGHT v0.3.0 — Install Everywhere
+
+          ## Distribution checklist
+
+          - ✅ One-click Windows `.exe` installer
+          - ✅ macOS `.app` bundle + `.dmg` installer image
+          - ✅ polished Android native shell (`.apk`)
+          - ✅ native SwiftUI iPhone/iPad application builds
+          - ✅ packaged C++ and Rust libraries
+          - ✅ SHA-256 manifest
+          - ✅ packaged GitHub Release with binaries
+
+          ## Apple signing boundary
+
+          The macOS build is ad-hoc signed rather than Apple-notarized. The iOS release includes a directly runnable Simulator app and an **unsigned** device `.ipa`. Physical-device distribution through TestFlight/App Store, and macOS notarization, require private Apple Developer signing credentials that are intentionally not stored in this public repository.
+
+          The HEARTLIGHT PWA remains installable on physical iPhone/iPad through Safari → Share → Add to Home Screen without an App Store account.
+
+          HEARTLIGHT is an educational/accessibility support tool, not a medical device, diagnostic system, automated discipline engine, or substitute for qualified professional judgment.
+          EOF
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.3.0
+          target_commitish: main
+          name: COSMOS HEARTLIGHT v0.3.0 — Install Everywhere
+          body_path: release-body.md
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            release/COSMOS-HEARTLIGHT-Setup.exe
+            release/COSMOS-HEARTLIGHT-Android.apk
+            release/COSMOS-HEARTLIGHT-macOS.dmg
+            release/COSMOS-HEARTLIGHT-macOS.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-unsigned.ipa
+            release/heartlight-cpp-linux.zip
+            release/heartlight-rust-linux.zip
+            release/SHA256SUMS.txt
