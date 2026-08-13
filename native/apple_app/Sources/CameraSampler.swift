@@ -8,7 +8,7 @@ final class CameraSampler: NSObject, ObservableObject, AVCaptureVideoDataOutputS
     @Published var blue: Double = 0
     @Published var brightness: Double = 0
     @Published var running = false
-    @Published var status = "Sensor stopped"
+    @Published var status = NSLocalizedString("Sensor stopped", comment: "Camera sensor status")
 
     private let session = AVCaptureSession()
     private let queue = DispatchQueue(label: "heartlight.camera.sample", qos: .userInitiated)
@@ -19,10 +19,10 @@ final class CameraSampler: NSObject, ObservableObject, AVCaptureVideoDataOutputS
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
                 if granted { self?.configureAndRun() }
-                else { DispatchQueue.main.async { self?.status = "Camera permission was not granted." } }
+                else { DispatchQueue.main.async { self?.status = NSLocalizedString("Camera permission was not granted.", comment: "Camera permission status") } }
             }
         default:
-            status = "Camera permission is disabled. The rest of HEARTLIGHT works without it."
+            status = NSLocalizedString("Camera permission is disabled. The rest of HEARTLIGHT works without it.", comment: "Camera permission status")
         }
     }
 
@@ -36,7 +36,7 @@ final class CameraSampler: NSObject, ObservableObject, AVCaptureVideoDataOutputS
                       let input = try? AVCaptureDeviceInput(device: device),
                       self.session.canAddInput(input) else {
                     self.session.commitConfiguration()
-                    DispatchQueue.main.async { self.status = "No camera is available." }
+                    DispatchQueue.main.async { self.status = NSLocalizedString("No camera is available.", comment: "Camera status") }
                     return
                 }
                 self.session.addInput(input)
@@ -48,12 +48,21 @@ final class CameraSampler: NSObject, ObservableObject, AVCaptureVideoDataOutputS
                 self.session.commitConfiguration()
             }
             self.session.startRunning()
-            DispatchQueue.main.async { self.running = true; self.status = "Sampling ambient color locally" }
+            DispatchQueue.main.async {
+                self.running = true
+                self.status = NSLocalizedString("Sampling ambient color locally", comment: "Camera sensor status")
+            }
         }
     }
 
     func stop() {
-        queue.async { [weak self] in self?.session.stopRunning(); DispatchQueue.main.async { self?.running = false; self?.status = "Sensor stopped" } }
+        queue.async { [weak self] in
+            self?.session.stopRunning()
+            DispatchQueue.main.async {
+                self?.running = false
+                self?.status = NSLocalizedString("Sensor stopped", comment: "Camera sensor status")
+            }
+        }
     }
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
