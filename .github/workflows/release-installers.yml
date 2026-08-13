@@ -6,6 +6,7 @@ on:
     paths:
       - 'VERSION'
       - 'INSTALLERS.md'
+      - 'app/**'
       - 'native/windows_app/**'
       - 'native/android_app/**'
       - 'native/apple_app/**'
@@ -16,7 +17,7 @@ permissions:
   contents: write
 
 env:
-  RELEASE_TAG: v0.3.0
+  RELEASE_TAG: v0.3.1
 
 jobs:
   windows:
@@ -160,27 +161,30 @@ jobs:
       - name: Write release notes
         run: |
           cat > release-body.md <<'EOF'
-          # COSMOS HEARTLIGHT v0.3.0 — Install Everywhere
+          # COSMOS HEARTLIGHT v0.3.1 — Multilingual
 
-          This release turns the distribution checklist green:
+          HEARTLIGHT now ships with an offline multilingual interface:
 
-          - ✅ One-click Windows `.exe` installer
-          - ✅ macOS `.app` and `.dmg`
-          - ✅ Android `.apk`
-          - ✅ native iPhone/iPad SwiftUI application builds
-          - ✅ C++ and Rust native library bundles
-          - ✅ SHA-256 checksums
+          - ✅ English interface
+          - ✅ Spanish / Español interface
+          - ✅ in-app language selector for web, Windows, and Android builds
+          - ✅ automatic Spanish localization for native iPhone/iPad/macOS builds when the device language is Spanish
+          - ✅ child support choices, teacher tools, safety notices, sensor guidance, study content, and dynamic messages localized
+          - ✅ no cloud translation service; language processing remains local to the device
+          - ✅ One-click Windows `.exe`, macOS `.app`/`.dmg`, Android `.apk`, native iOS builds, C++/Rust bundles, and SHA-256 checksums
 
-          **Apple signing note:** the public macOS build is ad-hoc signed and the iOS device `.ipa` is unsigned because this repository does not contain private Apple Developer credentials. App Store/TestFlight/notarized distribution requires the maintainer's Apple signing identity. The iOS Simulator app is directly runnable in Simulator; the existing PWA remains installable on physical iPhone/iPad without App Store signing.
+          The localization structure is intentionally extensible so additional languages can be added without rewriting the HEARTLIGHT engine or changing saved teacher-record schemas.
 
-          HEARTLIGHT is an educational/accessibility support tool, not a medical device, diagnostic system, automated discipline engine, or substitute for qualified professional judgment.
+          **Apple signing note:** the public macOS build is ad-hoc signed and the iOS device `.ipa` is unsigned because this repository does not contain private Apple Developer credentials. App Store/TestFlight/notarized distribution requires the maintainer's Apple signing identity.
+
+          HEARTLIGHT remains an educational/accessibility support tool, not a medical device, diagnostic system, automated discipline engine, or substitute for qualified professional judgment.
           EOF
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           target_commitish: main
-          name: COSMOS HEARTLIGHT v0.3.0 — Install Everywhere
+          name: COSMOS HEARTLIGHT v0.3.1 — Multilingual
           body_path: release-body.md
           make_latest: true
           fail_on_unmatched_files: true
