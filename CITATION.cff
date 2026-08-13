@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: COSMOS HEARTLIGHT
+message: If you use this software or its manuals, please cite the project and the associated COSMOS/CST publication record when provided by the author.
+type: software
+authors:
+  - family-names: Davis
+    given-names: Cory
+year: 2026
+license: Apache-2.0
