@@ -1,0 +1,190 @@
+name: HEARTLIGHT packaged release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'INSTALLERS.md'
+      - 'native/windows_app/**'
+      - 'native/android_app/**'
+      - 'native/apple_app/**'
+      - '.github/workflows/release-installers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: v0.3.0
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Publish self-contained Windows launcher
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force publish/windows, release | Out-Null
+          dotnet publish native/windows_app/Heartlight.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/windows
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+      - name: Build one-click EXE installer
+        shell: pwsh
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" native\windows_app\installer.iss'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: release/COSMOS-HEARTLIGHT-Setup.exe
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Embed the offline HEARTLIGHT application
+        run: |
+          mkdir -p native/android_app/app/src/main/assets
+          cp -R app/. native/android_app/app/src/main/assets/
+      - name: Build installable Android APK
+        run: gradle -p native/android_app :app:assembleDebug
+      - name: Stage Android package
+        run: |
+          mkdir -p release
+          cp native/android_app/app/build/outputs/apk/debug/app-debug.apk release/COSMOS-HEARTLIGHT-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-app
+          path: release/COSMOS-HEARTLIGHT-Android.apk
+          if-no-files-found: error
+
+  apple:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Apple projects
+        run: |
+          cd native/apple_app
+          xcodegen generate
+      - name: Build macOS application
+        run: |
+          mkdir -p release
+          xcodebuild -project native/apple_app/Heartlight.xcodeproj -scheme Heartlight-macOS -configuration Release -derivedDataPath build/macos CODE_SIGNING_ALLOWED=NO
+          APP="build/macos/Build/Products/Release/Heartlight.app"
+          codesign --force --deep --sign - "$APP"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" release/COSMOS-HEARTLIGHT-macOS.app.zip
+          mkdir -p build/dmgroot
+          cp -R "$APP" "build/dmgroot/Heartlight.app"
+          hdiutil create -volname "COSMOS HEARTLIGHT" -srcfolder build/dmgroot -ov -format UDZO release/COSMOS-HEARTLIGHT-macOS.dmg
+      - name: Build iOS Simulator application
+        run: |
+          xcodebuild -project native/apple_app/Heartlight.xcodeproj -scheme Heartlight-iOS -sdk iphonesimulator -configuration Release -derivedDataPath build/ios-sim CODE_SIGNING_ALLOWED=NO
+          SIMAPP="build/ios-sim/Build/Products/Release-iphonesimulator/Heartlight.app"
+          ditto -c -k --sequesterRsrc --keepParent "$SIMAPP" release/COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+      - name: Build unsigned iOS device package
+        run: |
+          xcodebuild -project native/apple_app/Heartlight.xcodeproj -scheme Heartlight-iOS -sdk iphoneos -configuration Release -derivedDataPath build/ios-device CODE_SIGNING_ALLOWED=NO
+          DEVICEAPP="build/ios-device/Build/Products/Release-iphoneos/Heartlight.app"
+          mkdir -p build/ipa/Payload
+          cp -R "$DEVICEAPP" build/ipa/Payload/Heartlight.app
+          (cd build/ipa && zip -qry ../../release/COSMOS-HEARTLIGHT-iOS-unsigned.ipa Payload)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apple-apps
+          path: |
+            release/COSMOS-HEARTLIGHT-macOS.dmg
+            release/COSMOS-HEARTLIGHT-macOS.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-unsigned.ipa
+          if-no-files-found: error
+
+  native-libraries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build C++ libraries
+        run: |
+          cmake -S native/cpp -B build/cpp -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/cpp --parallel 2
+          ctest --test-dir build/cpp --output-on-failure
+          cmake --install build/cpp --prefix "$PWD/stage/cpp"
+      - name: Build Rust libraries
+        run: |
+          cargo test --workspace --manifest-path native/rust/Cargo.toml
+          cargo build --release --workspace --manifest-path native/rust/Cargo.toml
+      - name: Package native libraries
+        run: |
+          mkdir -p release stage/rust
+          cp native/rust/target/release/libheartlight_ffi.* stage/rust/ 2>/dev/null || true
+          zip -qry release/heartlight-cpp-linux.zip stage/cpp
+          zip -qry release/heartlight-rust-linux.zip stage/rust
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-libraries
+          path: release/*.zip
+          if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [windows, android, apple, native-libraries]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+          merge-multiple: true
+      - name: Create checksums
+        run: |
+          cd release
+          sha256sum * > SHA256SUMS.txt
+      - name: Write release notes
+        run: |
+          cat > release-body.md <<'EOF'
+          # COSMOS HEARTLIGHT v0.3.0 — Install Everywhere
+
+          This release turns the distribution checklist green:
+
+          - ✅ One-click Windows `.exe` installer
+          - ✅ macOS `.app` and `.dmg`
+          - ✅ Android `.apk`
+          - ✅ native iPhone/iPad SwiftUI application builds
+          - ✅ C++ and Rust native library bundles
+          - ✅ SHA-256 checksums
+
+          **Apple signing note:** the public macOS build is ad-hoc signed and the iOS device `.ipa` is unsigned because this repository does not contain private Apple Developer credentials. App Store/TestFlight/notarized distribution requires the maintainer's Apple signing identity. The iOS Simulator app is directly runnable in Simulator; the existing PWA remains installable on physical iPhone/iPad without App Store signing.
+
+          HEARTLIGHT is an educational/accessibility support tool, not a medical device, diagnostic system, automated discipline engine, or substitute for qualified professional judgment.
+          EOF
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: main
+          name: COSMOS HEARTLIGHT v0.3.0 — Install Everywhere
+          body_path: release-body.md
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            release/COSMOS-HEARTLIGHT-Setup.exe
+            release/COSMOS-HEARTLIGHT-macOS.dmg
+            release/COSMOS-HEARTLIGHT-macOS.app.zip
+            release/COSMOS-HEARTLIGHT-Android.apk
+            release/COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-unsigned.ipa
+            release/heartlight-cpp-linux.zip
+            release/heartlight-rust-linux.zip
+            release/SHA256SUMS.txt

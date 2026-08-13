@@ -1,0 +1,38 @@
+name: Heartlight
+options:
+  bundleIdPrefix: world.navis
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    CURRENT_PROJECT_VERSION: 3
+    MARKETING_VERSION: 0.3.0
+
+targets:
+  Heartlight-iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_NAME: Heartlight
+        PRODUCT_BUNDLE_IDENTIFIER: world.navis.heartlight
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "COSMOS HEARTLIGHT"
+        INFOPLIST_KEY_NSCameraUsageDescription: "HEARTLIGHT uses the camera only when you start the optional ambient color and brightness sensor."
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+  Heartlight-macOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_NAME: Heartlight
+        PRODUCT_BUNDLE_IDENTIFIER: world.navis.heartlight.macos
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "COSMOS HEARTLIGHT"
+        INFOPLIST_KEY_NSCameraUsageDescription: "HEARTLIGHT uses the camera only when you start the optional ambient color and brightness sensor."
