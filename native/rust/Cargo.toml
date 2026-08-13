@@ -1,0 +1,3 @@
+[workspace]
+members = ["heartlight-core", "heartlight-ffi"]
+resolver = "2"
