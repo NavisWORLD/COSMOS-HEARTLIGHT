@@ -1,0 +1,40 @@
+{
+  "contract": "COSMOS HEARTLIGHT support-state",
+  "version": "1.0",
+  "range": [0, 10],
+  "dimensions": [
+    "sensory_load",
+    "visual_load",
+    "movement_need",
+    "focus_access",
+    "transition_need",
+    "communication_load",
+    "social_space_need",
+    "body_comfort",
+    "predictability_need",
+    "recovery_need",
+    "engagement_access",
+    "regulation_confidence"
+  ],
+  "needs_bit_order": [
+    "quiet",
+    "movement",
+    "dim_light",
+    "space",
+    "help",
+    "break",
+    "pressure",
+    "sound_choice",
+    "predictability",
+    "alternate_communication",
+    "unknown",
+    "company"
+  ],
+  "safety": {
+    "diagnosis": false,
+    "emotion_inference": false,
+    "misconduct_prediction": false,
+    "automated_discipline": false,
+    "biometric_interpretation": false
+  }
+}
