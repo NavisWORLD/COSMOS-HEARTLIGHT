@@ -14,15 +14,29 @@ struct SensorView: View {
                     RoundedRectangle(cornerRadius: 18)
                         .fill(Color(red: sampler.red, green: sampler.green, blue: sampler.blue))
                         .frame(height: 170)
-                        .overlay(Text("\(Int(sampler.brightness))% brightness").padding(8).background(.ultraThinMaterial).clipShape(Capsule()))
-                    Text(sampler.status).font(.callout)
+                        .overlay(
+                            HStack(spacing: 3) {
+                                Text(verbatim: "\(Int(sampler.brightness))%")
+                                Text("brightness")
+                            }
+                            .padding(8)
+                            .background(.ultraThinMaterial)
+                            .clipShape(Capsule())
+                        )
+                    Text(verbatim: sampler.status).font(.callout)
                     Toggle("Learner requested less light", isOn: $lessLightRequested)
                     if lessLightRequested && sampler.brightness >= 75 {
                         Text("The room reading is bright and less-light was requested. Consider reducing glare, moving position, or offering a lower-light option.")
                             .padding().background(.green.opacity(0.12)).clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     HStack {
-                        Button(sampler.running ? "Sampling…" : "Start sensor") { sampler.start() }.buttonStyle(.borderedProminent).disabled(sampler.running)
+                        Button {
+                            sampler.start()
+                        } label: {
+                            Text(sampler.running ? String(localized: "Sampling…") : String(localized: "Start sensor"))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(sampler.running)
                         Button("Stop") { sampler.stop() }.buttonStyle(.bordered)
                     }
                     Text("The sensor never decides what color a learner ‘should’ prefer. Learner preference wins.")
