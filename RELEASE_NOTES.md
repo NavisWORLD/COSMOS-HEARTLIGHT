@@ -1,36 +1,34 @@
-# COSMOS HEARTLIGHT — Initial Public Reference Release
+# COSMOS HEARTLIGHT Release Notes
 
-## Included
+## v0.2.0 — Native Engines & Books
 
-- installable local-first Progressive Web App
-- single-file standalone application
-- student support-needs interface
-- visual timer
-- optional local ambient color/brightness sensor
-- teacher neutral-observation log
-- local CSV export and erase controls
-- transparent 12D support-state model
-- accessibility controls
-- teacher manual
-- teacher quick start
-- study arc
-- stimming/sensory guide
-- therapy/clinician adjunct guides
-- student guide
-- family guide
-- behavioral aide quick guide
-- classroom scenarios
-- printable support menu
-- school deployment/privacy guide
-- architecture and data dictionary
-- research/validation guide
-- native/PWA packaging guide
-- static safety/privacy audit
+HEARTLIGHT is now a multi-language platform rather than a web-only reference implementation.
 
-## Reference-build safety posture
+### Added
 
-The public build intentionally avoids cloud accounts, advertising, tracking analytics, facial recognition, facial emotion recognition, continuous microphone capture, automated diagnosis, behavior-risk scores, automated discipline, and permanent child profiles.
+- portable C++17 core library
+- C++ static/shared builds and stable C ABI
+- C++ CLI demonstration and unit tests
+- Rust `heartlight-core` crate
+- Rust `heartlight-ffi` static/dynamic C ABI crate
+- shared machine-readable 12D state contract
+- Android, Apple, and Windows native integration guides
+- multi-language architecture manual
+- any-device deployment matrix
+- educator book
+- engineering book
+- study workbook
+- portfolio/product guide
+- GitHub Actions native C++ + Rust build workflow
 
-## Validation status
+### Design boundary retained
 
-The included `tests/static_audit.py` passes against this reference package. This is a repository regression check, not a regulatory or clinical certification.
+The optional bio observation channel is deliberately non-diagnostic. The reference engine does not infer medical condition, emotion, danger, compliance, or misconduct risk from pulse or other biometrics.
+
+### Verification
+
+The C++ build and unit test were compiled locally with CMake/G++ before publication. Rust verification is run in the repository's GitHub Actions workflow.
+
+## v0.1.0 — Public School-Support Reference Build
+
+Initial PWA, standalone app, teacher manuals, student/family resources, privacy architecture, school deployment guidance, static audit, and contribution infrastructure.
