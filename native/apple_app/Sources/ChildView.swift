@@ -25,7 +25,7 @@ struct ChildView: View {
                                     if selected.contains(need.id) { selected.remove(need.id) }
                                     else { selected.insert(need.id) }
                                 } label: {
-                                    Text(need.label).frame(maxWidth: .infinity, minHeight: 48)
+                                    Text(verbatim: need.label).frame(maxWidth: .infinity, minHeight: 48)
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .tint(selected.contains(need.id) ? .green : .gray.opacity(0.55))
@@ -46,7 +46,7 @@ struct ChildView: View {
                         let suggestions = supportSuggestions(selected: selected, sensory: sensory, brightness: nil)
                         VStack(alignment: .leading, spacing: 10) {
                             if suggestions.isEmpty { Text("Choose a need above to see options.").foregroundStyle(.secondary) }
-                            ForEach(suggestions, id: \.self) { Text("• \($0)") }
+                            ForEach(suggestions, id: \.self) { Text(verbatim: "• \($0)") }
                         }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 6)
                     }
 
@@ -59,7 +59,12 @@ struct ChildView: View {
                                 Button("1 min") { seconds = 60; timerRunning = false }
                                 Button("2 min") { seconds = 120; timerRunning = false }
                                 Button("5 min") { seconds = 300; timerRunning = false }
-                                Button(timerRunning ? "Pause" : "Start") { timerRunning.toggle() }.buttonStyle(.borderedProminent)
+                                Button {
+                                    timerRunning.toggle()
+                                } label: {
+                                    Text(timerRunning ? String(localized: "Pause") : String(localized: "Start"))
+                                }
+                                .buttonStyle(.borderedProminent)
                             }
                             Text("A timer is an option, not a punishment.").font(.footnote).foregroundStyle(.secondary)
                         }.frame(maxWidth: .infinity)
@@ -74,11 +79,14 @@ struct ChildView: View {
 }
 
 private struct SliderRow: View {
-    let title: String
+    let title: LocalizedStringKey
     @Binding var value: Double
     var body: some View {
         VStack(alignment: .leading) {
-            Text("\(title): \(Int(value))/10")
+            HStack(spacing: 0) {
+                Text(title)
+                Text(verbatim: ": \(Int(value))/10")
+            }
             Slider(value: $value, in: 0...10, step: 1)
         }
     }
