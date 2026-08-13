@@ -1,0 +1,10 @@
+[package]
+name = "heartlight-synapse"
+version = "1.0.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Deterministic 12-channel HEARTLIGHT synaptic kernel"
+
+[lib]
+name = "heartlight_synapse"
+path = "src/lib.rs"

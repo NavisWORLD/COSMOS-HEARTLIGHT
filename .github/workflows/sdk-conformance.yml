@@ -1,0 +1,32 @@
+name: HEARTLIGHT SDK conformance
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/cpp/**'
+      - 'native/rust/**'
+      - 'sdk/python/**'
+      - 'sdk/spec/**'
+      - '.github/workflows/sdk-conformance.yml'
+  pull_request:
+
+jobs:
+  native-and-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Python package smoke check
+        run: |
+          python -m pip install -e sdk/python
+          python -c "from heartlight_synapse import default_state, step; r=step(default_state(),[10,0,5,5,8,2,5,5,7,3,5,5]); assert abs(r.state[0]-5.75)<1e-12"
+      - name: C++ conformance
+        run: |
+          cmake -S native/cpp -B build/cpp -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/cpp --parallel 2
+          ctest --test-dir build/cpp --output-on-failure
+      - name: Rust conformance
+        run: cargo test --workspace --manifest-path native/rust/Cargo.toml

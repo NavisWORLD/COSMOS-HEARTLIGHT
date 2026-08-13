@@ -1,0 +1,37 @@
+{
+  "schema": "heartlight.synapse.conformance.v1",
+  "dimensions": 12,
+  "matrix_layout": "row-major",
+  "vectors": [
+    {
+      "name": "zero-weight-blend",
+      "config": {
+        "retention": 0.85,
+        "learning_rate": 0.08,
+        "weight_decay": 0.002,
+        "association_gain": 0.25,
+        "max_weight": 1.0
+      },
+      "state": [5,5,5,5,5,5,5,5,5,5,5,5],
+      "stimulus": [10,0,5,5,8,2,5,5,7,3,5,5],
+      "weights": "all-zero",
+      "expected_state": [5.75,4.25,5,5,5.45,4.55,5,5,5.3,4.7,5,5]
+    },
+    {
+      "name": "weighted-association",
+      "config": {
+        "retention": 0.8,
+        "learning_rate": 0.05,
+        "weight_decay": 0.01,
+        "association_gain": 0.3,
+        "max_weight": 0.75
+      },
+      "state": [1,2,3,4,5,6,7,8,9,10,0,5],
+      "stimulus": [9,8,7,6,5,4,3,2,1,0,10,5],
+      "weight_formula": "((i-j) mod 5 - 2) / 10, with a non-negative mathematical modulo",
+      "expected_state": [2.575,3.1625,3.775,4.4125,5.075,5.575,6.1625,6.775,7.4125,8.075,1.975,4.9625],
+      "expected_weight_prefix_24": [-0.2174,0.18345,0.0893,-0.00485,-0.099,-0.19315,0.2077,0.11355,0.0194,-0.07475,-0.22225,0.198,-0.1137,-0.209025,0.19065,0.095325,0,-0.095325,-0.19065,0.209025,0.1137,0.018375,-0.117375,-0.198],
+      "expected_weight_sum": -0.297
+    }
+  ]
+}
