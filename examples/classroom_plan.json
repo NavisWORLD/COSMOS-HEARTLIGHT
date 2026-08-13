@@ -1,0 +1,9 @@
+{
+  "learner_code": "Example-A",
+  "communication": ["speech", "pointing", "typing"],
+  "environmental_barriers": ["high hallway noise during transitions", "overhead glare"],
+  "preferred_supports": ["first-then visual", "two-minute movement option", "lower-glare seat"],
+  "avoid": ["forced eye contact", "unexpected touch", "rapid repeated verbal prompts"],
+  "learner_can_reject_support": true,
+  "review_period_days": 30
+}
