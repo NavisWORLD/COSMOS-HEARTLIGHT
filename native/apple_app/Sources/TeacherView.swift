@@ -30,7 +30,10 @@ struct TeacherView: View {
                     Button("Save locally") { save() }.buttonStyle(.borderedProminent)
                 }
                 Section("Local records") {
-                    Text("\(observations.count) observation(s) saved on this device.")
+                    Text(verbatim: String.localizedStringWithFormat(
+                        NSLocalizedString("%d observation(s) saved on this device.", comment: "Local teacher observation count"),
+                        observations.count
+                    ))
                     Button("Erase all local observations", role: .destructive) { observations = []; persist() }
                 }
                 Section("Human decision boundary") {
