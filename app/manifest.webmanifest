@@ -1,0 +1,10 @@
+{
+  "name":"COSMOS HEARTLIGHT",
+  "short_name":"HEARTLIGHT",
+  "description":"Local-first inclusive learning, communication and regulation support toolkit.",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#f7f7fb",
+  "theme_color":"#1b1b1f",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
