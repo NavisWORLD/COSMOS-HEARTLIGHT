@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# HEARTLIGHT local/exported records
+heartlight-observations*.csv
+*.student-export.csv
+
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+
+# Build/package output
+build/
+dist/
+*.zip
