@@ -1,6 +1,7 @@
 name: Heartlight
 options:
   bundleIdPrefix: world.navis
+  xcodeVersion: "15.4"
 settings:
   base:
     SWIFT_VERSION: 5.0
