@@ -1,0 +1,109 @@
+name: Publish HEARTLIGHT v0.3.1 multilingual binaries
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v0.3.1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  VERIFIED_RUN_ID: '31673554169'
+  RELEASE_TAG: v0.3.1
+
+jobs:
+  publish:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download verified multilingual build artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          gh run download "$VERIFIED_RUN_ID" --repo "$GITHUB_REPOSITORY" --name windows-installer --dir release
+          gh run download "$VERIFIED_RUN_ID" --repo "$GITHUB_REPOSITORY" --name android-app --dir release
+          gh run download "$VERIFIED_RUN_ID" --repo "$GITHUB_REPOSITORY" --name apple-apps --dir release
+          gh run download "$VERIFIED_RUN_ID" --repo "$GITHUB_REPOSITORY" --name native-libraries --dir release
+
+      - name: Verify complete multilingual release payload
+        run: |
+          set -euo pipefail
+          required=(
+            COSMOS-HEARTLIGHT-Setup.exe
+            COSMOS-HEARTLIGHT-Android.apk
+            COSMOS-HEARTLIGHT-macOS.dmg
+            COSMOS-HEARTLIGHT-macOS.app.zip
+            COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+            COSMOS-HEARTLIGHT-iOS-unsigned.ipa
+            heartlight-cpp-linux.zip
+            heartlight-rust-linux.zip
+          )
+          for file in "${required[@]}"; do
+            test -s "release/$file" || { echo "Missing release/$file"; exit 1; }
+          done
+          echo "Verified ${#required[@]} multilingual release artifacts."
+
+      - name: Generate SHA-256 manifest
+        run: |
+          cd release
+          shasum -a 256 \
+            COSMOS-HEARTLIGHT-Setup.exe \
+            COSMOS-HEARTLIGHT-Android.apk \
+            COSMOS-HEARTLIGHT-macOS.dmg \
+            COSMOS-HEARTLIGHT-macOS.app.zip \
+            COSMOS-HEARTLIGHT-iOS-Simulator.app.zip \
+            COSMOS-HEARTLIGHT-iOS-unsigned.ipa \
+            heartlight-cpp-linux.zip \
+            heartlight-rust-linux.zip > SHA256SUMS.txt
+
+      - name: Write multilingual release notes
+        run: |
+          cat > release-body.md <<'EOF'
+          # COSMOS HEARTLIGHT v0.3.1 — Multilingual
+
+          HEARTLIGHT now ships with a first-class offline multilingual interface.
+
+          - ✅ English (`en`)
+          - ✅ Spanish / Español (`es`)
+          - ✅ instant English ⇄ Español selector in the web/PWA, Windows, and Android application family
+          - ✅ native Spanish localization resources for iPhone, iPad, and macOS
+          - ✅ Spanish localization for learner choices, support suggestions, teacher/aide tools, room-sensor guidance, safety boundaries, accessibility settings, alerts, and status messages
+          - ✅ Spanish quick guides for students, teachers/aides, privacy, and safety
+          - ✅ no cloud translation service; localization stays local to the device
+          - ✅ stable saved-record/CSV schema independent of interface language
+          - ✅ extensible locale architecture for adding more languages without rebuilding the HEARTLIGHT engine
+
+          ## Verified packaged artifacts
+
+          This release is assembled from GitHub Actions run `31673554169`, where Windows, Android, macOS, iOS Simulator, unsigned iOS device packaging, C++, and Rust all completed successfully after the English/Spanish Apple resources were bundled.
+
+          **Apple signing note:** the public macOS build is ad-hoc signed and the iOS device `.ipa` is unsigned because private Apple Developer signing credentials are not stored in this public repository. App Store/TestFlight/notarized distribution requires the maintainer's Apple signing identity.
+
+          HEARTLIGHT remains an educational/accessibility support tool, not a medical device, diagnostic system, automated discipline engine, or substitute for qualified professional judgment.
+          EOF
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: main
+          name: COSMOS HEARTLIGHT v0.3.1 — Multilingual
+          body_path: release-body.md
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            release/COSMOS-HEARTLIGHT-Setup.exe
+            release/COSMOS-HEARTLIGHT-Android.apk
+            release/COSMOS-HEARTLIGHT-macOS.dmg
+            release/COSMOS-HEARTLIGHT-macOS.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-Simulator.app.zip
+            release/COSMOS-HEARTLIGHT-iOS-unsigned.ipa
+            release/heartlight-cpp-linux.zip
+            release/heartlight-rust-linux.zip
+            release/SHA256SUMS.txt
