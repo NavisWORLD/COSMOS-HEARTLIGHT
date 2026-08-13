@@ -5,8 +5,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: 5.0
-    CURRENT_PROJECT_VERSION: 3
-    MARKETING_VERSION: 0.3.0
+    CURRENT_PROJECT_VERSION: 4
+    MARKETING_VERSION: 0.3.1
 
 targets:
   Heartlight-iOS:
@@ -15,6 +15,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - Sources
+    resources:
+      - Resources
     settings:
       base:
         PRODUCT_NAME: Heartlight
@@ -30,6 +32,8 @@ targets:
     deploymentTarget: "13.0"
     sources:
       - Sources
+    resources:
+      - Resources
     settings:
       base:
         PRODUCT_NAME: Heartlight
