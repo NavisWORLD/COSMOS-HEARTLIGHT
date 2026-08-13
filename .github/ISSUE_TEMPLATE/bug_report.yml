@@ -1,0 +1,32 @@
+name: 🐛 Bug report
+description: Report a reproducible HEARTLIGHT software problem
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never include real student names, faces, recordings, IEP documents, medical details, or other private student information in a public issue.**
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the software behavior using non-identifying test data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Device / browser
+      placeholder: "Example: iPadOS + Safari"
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Use synthetic/demo data only.
