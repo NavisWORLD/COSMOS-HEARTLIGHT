@@ -23,6 +23,13 @@ jobs:
         run: cmake --build build/cpp --parallel 2
       - name: Test C++
         run: ctest --test-dir build/cpp --output-on-failure
+      - name: Stage installable C++ package
+        run: cmake --install build/cpp --prefix build/cpp-install
+      - name: Upload C++ libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: heartlight-cpp-linux
+          path: build/cpp-install/
 
   rust:
     runs-on: ubuntu-latest
@@ -34,3 +41,10 @@ jobs:
         run: cargo test --workspace --manifest-path native/rust/Cargo.toml
       - name: Build Rust release
         run: cargo build --release --workspace --manifest-path native/rust/Cargo.toml
+      - name: Upload Rust libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: heartlight-rust-linux
+          path: |
+            native/rust/target/release/libheartlight_ffi.a
+            native/rust/target/release/libheartlight_ffi.so
