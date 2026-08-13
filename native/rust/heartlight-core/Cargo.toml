@@ -1,0 +1,10 @@
+[package]
+name = "heartlight-core"
+version = "0.2.0"
+edition = "2021"
+description = "Portable, transparent support-state engine for COSMOS HEARTLIGHT"
+license = "Apache-2.0"
+
+[lib]
+name = "heartlight_core"
+path = "src/lib.rs"
