@@ -1,0 +1,25 @@
+name: 💚 Support improvement
+description: Propose an accessibility, classroom, privacy, or engineering improvement
+title: "[Idea] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        HEARTLIGHT favors learner autonomy, transparency, privacy, accessibility, and low-risk support. Proposals for surveillance, hidden scoring, automated diagnosis, or automated discipline are out of scope.
+  - type: textarea
+    id: need
+    attributes:
+      label: What learner/teacher need would this help?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Privacy / accessibility / safety considerations
